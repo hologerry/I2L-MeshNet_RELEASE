@@ -1,7 +1,11 @@
 import random
+
 import numpy as np
+
 from torch.utils.data.dataset import Dataset
-from config import cfg
+
+from main.config import cfg
+
 
 class MultipleDatasets(Dataset):
     def __init__(self, dbs, make_same_len=True):
@@ -22,10 +26,12 @@ class MultipleDatasets(Dataset):
     def __getitem__(self, index):
         if self.make_same_len:
             db_idx = index // self.max_db_data_num
-            data_idx = index % self.max_db_data_num 
-            if data_idx >= len(self.dbs[db_idx]) * (self.max_db_data_num // len(self.dbs[db_idx])): # last batch: random sampling
-                data_idx = random.randint(0,len(self.dbs[db_idx])-1)
-            else: # before last batch: use modular
+            data_idx = index % self.max_db_data_num
+            if data_idx >= len(self.dbs[db_idx]) * (
+                self.max_db_data_num // len(self.dbs[db_idx])
+            ):  # last batch: random sampling
+                data_idx = random.randint(0, len(self.dbs[db_idx]) - 1)
+            else:  # before last batch: use modular
                 data_idx = data_idx % len(self.dbs[db_idx])
         else:
             for i in range(self.db_num):
@@ -35,6 +41,6 @@ class MultipleDatasets(Dataset):
             if db_idx == 0:
                 data_idx = index
             else:
-                data_idx = index - self.db_len_cumsum[db_idx-1]
+                data_idx = index - self.db_len_cumsum[db_idx - 1]
 
         return self.dbs[db_idx][data_idx]
